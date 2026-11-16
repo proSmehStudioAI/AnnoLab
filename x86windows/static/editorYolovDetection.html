@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnnoLab — Редактор разметки</title>
+  <script src="editorYolovDetection/main.js" defer></script>
+  <link rel="stylesheet" href="editorYolovDetection.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar__left">
+      <div class="logo">
+        <span class="logo__mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <rect x="8.5" y="8.5" width="7" height="7" rx="1.6"/>
+          </svg>
+        </span>
+        <span class="logo__text">AnnoLab</span>
+      </div>
+      <span class="topbar__sep">/</span>
+      <span class="topbar__project">—</span>
+      <span class="chip chip--type">YOLOv detection</span>
+      <span class="chip chip--active">
+        <span class="chip__dot"></span>
+        Активный
+      </span>
+    </div>
+
+    <div class="topbar__actions">
+      <button class="btn-ghost" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        Назад
+      </button>
+    </div>
+  </header>
+
+  <main class="editor">
+
+    <section class="canvas-area">
+
+      <div class="toolbar">
+        <label class="toolbar__toggle" title="Автоматически находить объекты моделью">
+          <input type="checkbox" id="auto-detect" checked>
+          <span class="toolbar__toggle-box">
+            <svg class="toolbar__toggle-icon" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round">
+              <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/>
+            </svg>
+            <span>Авто-детект</span>
+          </span>
+        </label>
+
+        <div class="toolbar__group">
+          <button class="tool-btn" type="button" title="Отдалить">−</button>
+          <span class="zoom-value">100%</span>
+          <button class="tool-btn" type="button" title="Приблизить">+</button>
+        </div>
+
+        <button class="btn-upload" type="button" id="btn-upload" title="Загрузить дополнительные изображения">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Загрузить
+        </button>
+
+        <input type="file" id="upload-input" accept="image/*" multiple hidden>
+
+        <div class="progress-widget" title="Заполнено датасета">
+          <span class="progress-widget__label">Датасет</span>
+          <div class="progress-widget__bar">
+            <div class="progress-widget__fill" id="progress-fill"></div>
+          </div>
+          <span class="progress-widget__pct" id="progress-pct">0%</span>
+        </div>
+
+        <div class="toolbar__group toolbar__group--right">
+          <label class="toolbar__label" for="imgsz-view">imgsz:</label>
+          <select class="toolbar__select" id="imgsz-view">
+            <option value="320">320</option>
+            <option value="416">416</option>
+            <option value="512">512</option>
+            <option value="640" selected>640</option>
+            <option value="1024">1024</option>
+            <option value="1280">1280</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <button class="nav-arrow nav-arrow--prev" type="button"
+                title="Предыдущая картинка" aria-label="Предыдущая картинка" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+
+        <div class="canvas-image">
+          <div class="canvas-image__bg" aria-hidden="true"></div>
+          <img class="canvas-image__img" alt="" hidden>
+          <div class="canvas-boxes" id="boxes-layer"></div>
+        </div>
+
+        <button class="nav-arrow nav-arrow--next" type="button"
+                title="Следующая картинка" aria-label="Следующая картинка" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="statusbar">
+        <span class="statusbar__file">—</span>
+        <span class="statusbar__sep">·</span>
+        <span class="statusbar__dims">—</span>
+        <span class="statusbar__sep">·</span>
+        <span class="statusbar__counter">0 / 0</span>
+        <span class="statusbar__hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="7" y="2" width="10" height="20" rx="5"/>
+            <path d="M12 7v3"/>
+          </svg>
+          ПКМ — рисовать · колесо — зум · ЛКМ — панорама · <kbd>A</kbd> — авто-разметка
+        </span>
+      </div>
+
+    </section>
+
+    <aside class="sidebar">
+
+      <section class="sidebar__section">
+        <h3 class="sidebar__title">Классы</h3>
+        <ul class="classes" id="classes-list">
+          <li class="classes__empty">Загрузка…</li>
+        </ul>
+      </section>
+
+      <section class="sidebar__section">
+        <h3 class="sidebar__title">Статус проекта</h3>
+        <label class="check">
+          <input type="checkbox" id="project-state">
+          <span>Активный проект (обучение идёт)</span>
+        </label>
+      </section>
+
+      <section class="sidebar__section">
+        <h3 class="sidebar__title">Параметры обучения</h3>
+
+        <div class="field">
+          <label class="field__label" for="train-model">Модель</label>
+          <div class="field__control">
+            <select id="train-model">
+              <option value="yolo26n" selected>yolo26n</option>
+              <option value="yolo26s">yolo26s</option>
+              <option value="yolo26m">yolo26m</option>
+              <option value="yolo26l">yolo26l</option>
+              <option value="yolo26x">yolo26x</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field__label" for="train-imgsz">imgsz</label>
+            <div class="field__control">
+              <input type="number" id="train-imgsz" value="640" min="32" max="4096" step="32">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="train-lr">lr</label>
+            <div class="field__control">
+              <input type="number" id="train-lr" value="0.0001" min="0.000001" max="1" step="0.0001">
+            </div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field__label" for="train-batch">batch</label>
+            <div class="field__control">
+              <input type="number" id="train-batch" value="16" min="1" max="512">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="train-workers">workers</label>
+            <div class="field__control">
+              <input type="number" id="train-workers" value="2" min="0" max="32">
+            </div>
+          </div>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="train-gpu" checked>
+          <span>Использовать GPU</span>
+        </label>
+      </section>
+
+      <section class="sidebar__section">
+        <div class="metrics-head">
+          <h3 class="sidebar__title">Графики обучения</h3>
+          <span class="metrics-badge" id="metrics-epoch">эп. —</span>
+        </div>
+
+        <ul class="metrics">
+          <li class="metric">
+            <div class="metric__head">
+              <span class="metric__name">box_loss</span>
+              <span class="metric__value metric__value--loss" data-metric-value="box_loss">—</span>
+            </div>
+            <svg class="metric__chart" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric__grid" d="M0 8 H100 M0 16 H100 M0 24 H100"/>
+              <path class="metric__line metric__line--loss"
+                    data-metric-line="box_loss"
+                    d="M0 32 L100 32"/>
+            </svg>
+          </li>
+          <li class="metric">
+            <div class="metric__head">
+              <span class="metric__name">cls_loss</span>
+              <span class="metric__value metric__value--loss" data-metric-value="cls_loss">—</span>
+            </div>
+            <svg class="metric__chart" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric__grid" d="M0 8 H100 M0 16 H100 M0 24 H100"/>
+              <path class="metric__line metric__line--loss"
+                    data-metric-line="cls_loss"
+                    d="M0 32 L100 32"/>
+            </svg>
+          </li>
+          <li class="metric">
+            <div class="metric__head">
+              <span class="metric__name">dfl_loss</span>
+              <span class="metric__value metric__value--loss" data-metric-value="dfl_loss">—</span>
+            </div>
+            <svg class="metric__chart" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric__grid" d="M0 8 H100 M0 16 H100 M0 24 H100"/>
+              <path class="metric__line metric__line--loss"
+                    data-metric-line="dfl_loss"
+                    d="M0 32 L100 32"/>
+            </svg>
+          </li>
+          <li class="metric">
+            <div class="metric__head">
+              <span class="metric__name">precision</span>
+              <span class="metric__value metric__value--good" data-metric-value="precision">—</span>
+            </div>
+            <svg class="metric__chart" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric__grid" d="M0 8 H100 M0 16 H100 M0 24 H100"/>
+              <path class="metric__line metric__line--good"
+                    data-metric-line="precision"
+                    d="M0 32 L100 32"/>
+            </svg>
+          </li>
+          <li class="metric">
+            <div class="metric__head">
+              <span class="metric__name">recall</span>
+              <span class="metric__value metric__value--good" data-metric-value="recall">—</span>
+            </div>
+            <svg class="metric__chart" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric__grid" d="M0 8 H100 M0 16 H100 M0 24 H100"/>
+              <path class="metric__line metric__line--good"
+                    data-metric-line="recall"
+                    d="M0 32 L100 32"/>
+            </svg>
+          </li>
+          <li class="metric">
+            <div class="metric__head">
+              <span class="metric__name">mAP@50</span>
+              <span class="metric__value metric__value--good" data-metric-value="map50">—</span>
+            </div>
+            <svg class="metric__chart" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric__grid" d="M0 8 H100 M0 16 H100 M0 24 H100"/>
+              <path class="metric__line metric__line--good"
+                    data-metric-line="map50"
+                    d="M0 32 L100 32"/>
+            </svg>
+          </li>
+          <li class="metric metric--wide">
+            <div class="metric__head">
+              <span class="metric__name">mAP@50-95</span>
+              <span class="metric__value metric__value--good" data-metric-value="map50_95">—</span>
+            </div>
+            <svg class="metric__chart" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric__grid" d="M0 8 H100 M0 16 H100 M0 24 H100"/>
+              <path class="metric__line metric__line--good"
+                    data-metric-line="map50_95"
+                    d="M0 32 L100 32"/>
+            </svg>
+          </li>
+        </ul>
+      </section>
+
+    </aside>
+
+  </main>
+
+  <div class="modal" id="modal-warning" hidden>
+    <div class="modal__overlay" data-warning-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true">
+      <header class="modal__head">
+        <h2 class="modal__title">Изображение без разметки</h2>
+      </header>
+      <div class="modal__body">
+        <p class="warning-text">
+          Вы не выделили ни одного объекта на этом изображении.
+          Перейти к следующей картинке и пропустить текущую?
+        </p>
+        <p class="warning-hint">
+          Нажмите <kbd>Enter</kbd>, чтобы пропустить
+        </p>
+      </div>
+      <footer class="modal__foot">
+        <button class="btn-ghost" type="button" data-warning-close>Остаться</button>
+        <button class="btn-primary" type="button" id="btn-skip">Пропустить</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnnoLab — локальное приложение для разметки</title>
+
+  <script src="mainPage.js" defer></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="auth">
+
+    <section class="brand">
+      <span class="brand__glow brand__glow--1"></span>
+      <span class="brand__glow brand__glow--2"></span>
+
+      <div class="brand__top">
+        <a class="logo" href="#">
+          <span class="logo__mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="5"/>
+              <rect x="8.5" y="8.5" width="7" height="7" rx="1.6"/>
+            </svg>
+          </span>
+          <span class="logo__text">AnnoLab</span>
+        </a>
+        <span class="chip">ИИ · локально</span>
+      </div>
+
+      <div class="brand__body">
+        <h1>Разметка, которая<br>учится на ваших данных</h1>
+        <p class="lead">
+          Максимально автоматизированный пайплайн: модель сама предлагает боксы, полигоны
+          и ключевые точки, а в фоне дообучается на каждой размеченной картинке.
+          Чем больше размечаете — тем точнее автоподсказки. Всё локально, прямо в браузере.
+        </p>
+
+        <ul class="features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="m8.5 12.2 2.4 2.4 4.6-4.9"/>
+            </svg>
+            ИИ-предразметка: модель предлагает объекты — вы только правите
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="m8.5 12.2 2.4 2.4 4.6-4.9"/>
+            </svg>
+            Обучение в реальном времени — прямо во время разметки, в фоне
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="m8.5 12.2 2.4 2.4 4.6-4.9"/>
+            </svg>
+            Чем больше данных — тем точнее подсказки и меньше ручных действий
+          </li>
+        </ul>
+
+        <div class="demo" aria-hidden="true">
+          <div class="demo__img">
+            <span class="demo__box demo__box--1">
+              <span class="demo__tag">car · 0.98 · auto</span>
+            </span>
+            <span class="demo__box demo__box--2">
+              <span class="demo__tag">person · 0.91 · auto</span>
+            </span>
+          </div>
+          <div class="demo__bar">
+            <span class="demo__dot"></span>
+            <span class="demo__dot demo__dot--alt"></span>
+            <span class="demo__meta">обучение в фоне · эп. 42</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand__foot">
+        <span>© 2025 AnnoLab</span>
+        <span class="brand__sep">·</span>
+        <span>Данные и модель хранятся на локальных серверах</span>
+      </div>
+    </section>
+
+    <section class="panel">
+
+      <div class="panel__logo">
+        <a class="logo logo--dark" href="#">
+          <span class="logo__mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="5"/>
+              <rect x="8.5" y="8.5" width="7" height="7" rx="1.6"/>
+            </svg>
+          </span>
+          <span class="logo__text">AnnoLab</span>
+        </a>
+      </div>
+
+      <form class="form">
+        <h2 class="form__title">С возвращением 👋</h2>
+        <p class="form__sub">Введите логин и пароль локального аккаунта.</p>
+
+        <div class="field">
+          <label class="field__label" for="login-name">Логин</label>
+          <div class="field__control">
+            <svg class="field__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="3.6"/>
+              <path d="M5 20a7 7 0 0 1 14 0"/>
+            </svg>
+            <input type="text" id="login-name" name="login" placeholder="ваш логин"
+                   autocomplete="username">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="login-pass">Пароль</label>
+          <div class="field__control field__control--password">
+            <svg class="field__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="10" width="16" height="10.5" rx="3.2"/>
+              <path d="M8 10V7.2a4 4 0 0 1 8 0V10"/>
+            </svg>
+            <input type="password" id="login-pass" name="password" placeholder="••••••••••"
+                   autocomplete="current-password">
+
+            <input type="checkbox" id="toggle-pass" class="visually-hidden"
+                   aria-label="Показать пароль">
+
+            <label for="toggle-pass" class="field__toggle" title="Показать пароль">
+              <svg class="field__eye field__eye--show" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                   stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg class="field__eye field__eye--hide" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                   stroke-linejoin="round" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </label>
+          </div>
+        </div>
+
+        <button class="btn" type="button">Войти</button>
+      </form>
+
+    </section>
+
+  </main>
+
+</body>
+</html>
