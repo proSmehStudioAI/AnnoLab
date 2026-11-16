@@ -142,17 +142,17 @@ router.exe
 
 ```
 [main] worker script: C:\DatasetYoloManager\test\pythonWorkerTrain\pythonWorkerTrainYolov.py  exists=yes
-[Manager] spawn: py -u "...\pythonWorkerTrainYolov.py" --projectname "stalzone"
+[Manager] spawn: py -u "...\pythonWorkerTrainYolov.py" --projectname "chromeDino"
 [Manager] inf spawn: py -u "...\pythonWorkerTrainYolov.py" --projectname "chromeDino" --serve
 HTTP  server: http://127.0.0.1:80
 HTTPS server: https://127.0.0.1:443
 Serving: C:\DatasetYoloManager\test\static
-[Manager] inf spawn: py -u "...\pythonWorkerTrainYolov.py" --projectname "stalzone" --serve
+[Manager] inf spawn: py -u "...\pythonWorkerTrainYolov.py" --projectname "chromeDino" --serve
 ```
 
 Как это читать:
 
-- 🧠 `spawn: ... --projectname "stalzone"` — запущен **воркер обучения** для проекта `stalzone`
+- 🧠 `spawn: ... --projectname "chromeDino"` — запущен **воркер обучения** для проекта `chromeDino`
 - 🎯 `inf spawn: ... --serve` — запущен **воркер инференса** для проекта (используется кнопкой «Авто-разметка» в редакторе)
 - 🌐 `HTTP server: http://127.0.0.1:80` — по этому адресу открывается интерфейс
 - 📁 `Serving: ...static` — откуда раздаются HTML/CSS/JS
