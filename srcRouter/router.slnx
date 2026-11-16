@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="router/router.vcxproj" Id="d5d7a555-c6b3-462b-a623-d4a5fcad8b8e" />
+</Solution>
