@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import time
+import random
 import argparse
 import shutil
 from pathlib import Path
@@ -9,48 +10,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 from ultralytics import YOLO
-from ultralytics.data.dataset import YOLODataset
 from ultralytics.data.utils import img2label_paths
-from ultralytics.models.yolo.detect import DetectionTrainer
-from ultralytics.utils.torch_utils import unwrap_model
-
-
-class FilteredYOLODataset(YOLODataset):
-    def get_img_files(self, img_path):
-        im_files = super().get_img_files(img_path)
-        label_paths = img2label_paths(im_files)
-        filtered = []
-        skipped = 0
-        for img, lbl in zip(im_files, label_paths):
-            p = Path(lbl)
-            if p.exists() and p.stat().st_size > 0:
-                filtered.append(img)
-            else:
-                skipped += 1
-        if skipped:
-            print(f"[FilteredDataset] Пропущено {skipped} изображений без валидных labels")
-        print(f"[FilteredDataset] Итого в датасете: {len(filtered)} пар image+label")
-        return filtered
-
-
-class DynamicTrainer(DetectionTrainer):
-    def build_dataset(self, img_path, mode="train", batch=None):
-        gs = max(int(unwrap_model(self.model).stride.max() if self.model else 0), 32)
-        return FilteredYOLODataset(
-            img_path=img_path,
-            imgsz=self.args.imgsz,
-            cache=self.args.cache,
-            augment=mode == "train",
-            hyp=self.args,
-            rect=mode == "val",
-            batch_size=batch,
-            stride=gs,
-            pad=0.0 if mode == "train" else 0.5,
-            data=self.data,
-            fraction=self.args.fraction,
-            task=self.args.task,
-            classes=self.args.classes,
-        )
 
 
 class TrainingOrchestrator:
@@ -84,7 +44,7 @@ class TrainingOrchestrator:
         labels_dir = self.project_dir / 'labels'
         if not labels_dir.exists():
             return 0
-        return len([p for p in labels_dir.glob('*.txt') if p.stat().st_size > 0])
+        return len(list(labels_dir.glob('*.txt')))
 
     def check_epoch(self, trainer):
         current = self._load_settings()
@@ -129,6 +89,41 @@ class TrainingOrchestrator:
         self.restart_reason = ""
         self.load_best_on_restart = False
         self.model_changed = False
+
+
+def _seeded_split(project_dir: Path, val_split: float = 0.2, seed: int = 42):
+    exts = ('*.jpg', '*.jpeg', '*.png', '*.bmp', '*.webp', '*.tif', '*.tiff')
+    imgs = []
+    for ext in exts:
+        imgs.extend((project_dir / 'images').glob(ext))
+    imgs = sorted({p.resolve() for p in imgs})
+
+    labeled = []
+    for img in imgs:
+        lbl = Path(img2label_paths([str(img)])[0])
+        if lbl.exists():
+            labeled.append(img)
+
+    if not labeled:
+        raise FileNotFoundError(
+            f"Нет размеченных изображений в {project_dir / 'images'}")
+
+    rng = random.Random(seed)
+    order = labeled[:]
+    rng.shuffle(order)
+
+    n_val = max(1, min(len(order) - 1, round(len(order) * val_split)))
+    val_imgs = order[:n_val]
+    train_imgs = order[n_val:]
+
+    train_txt = project_dir / 'train.txt'
+    val_txt = project_dir / 'val.txt'
+    train_txt.write_text('\n'.join(map(str, train_imgs)), encoding='utf-8')
+    val_txt.write_text('\n'.join(map(str, val_imgs)), encoding='utf-8')
+
+    print(f"[Split] seed={seed}, val_split={val_split}: "
+          f"train={len(train_imgs)}, val={len(val_imgs)}")
+    return train_txt, val_txt
 
 
 def _export_checkpoints(project_dir: Path, model_name: str):
@@ -207,6 +202,16 @@ def run_training(project_dir: Path, settings_path: Path):
         with open(settings_path, 'r', encoding='utf-8') as f:
             settings = json.load(f)
 
+        try:
+            _seeded_split(
+                project_dir,
+                val_split=float(settings.get('valSplit', 0.2)),
+                seed=int(settings.get('seed', 42)),
+            )
+        except FileNotFoundError as e:
+            print(f"[Main] {e}")
+            break
+
         model_name = settings['modelSelected']
         imgsz = int(settings.get('imgsz', 640))
         lr = float(settings.get('lr', 0.0001))
@@ -268,7 +273,6 @@ def run_training(project_dir: Path, settings_path: Path):
                 val=True,
                 verbose=False,
                 optimizer='AdamW',
-                trainer=DynamicTrainer,
             )
         except Exception as e:
             print(f"[Main] Обучение прервано: {e}")
@@ -517,10 +521,12 @@ def prepare_data_yaml(project_dir: Path):
     with open(coco_txt, 'r', encoding='utf-8') as f:
         classes = [line.strip() for line in f if line.strip()]
 
+    train_txt, val_txt = _seeded_split(project_dir)
+
     data_yaml = {
         'path': str(project_dir.absolute()),
-        'train': 'images',
-        'val': 'images',
+        'train': str(train_txt),
+        'val': str(val_txt),
         'names': {i: name for i, name in enumerate(classes)},
         'nc': len(classes),
     }
